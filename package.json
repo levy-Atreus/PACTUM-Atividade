@@ -1,0 +1,24 @@
+{
+  "name": "pactum-contract",
+  "version": "1.0.0",
+  "description": "Testes de Contrato com Pactum",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha ./test/**/*.test.js",
+    "test:gql": "mocha ./test/graphql/**/*.test.js",
+    "test:rest": "mocha ./test/api/**/*.test.js",
+    "test:contractProvider": "mocha ./test/contract/loginProvider.test.js",
+    "test:contractConsumer": "mocha ./test/contract/loginConsumer.test.js"
+  },
+  "keywords": [],
+  "author": "ernestosbarbosa",
+  "license": "ISC",
+  "devDependencies": {
+    "mocha": "^10.3.0",
+    "pactum": "^3.6.0"
+  },
+  "dependencies": {
+    "pactum-flow-plugin": "^0.1.4",
+    "pactum-matchers": "^1.1.6"
+  }
+}
