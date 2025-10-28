@@ -30,11 +30,6 @@ Navegue até o diretório raiz do projeto e instale as dependências:
 ```bash
 npm install
 
-Teste, Comando, Descrição
-Todos os Testes, npm test,Executa todos os testes (API Funcional e Contrato).
-API Funcional, npm run api-test, Executa apenas os testes que batem na API real (CRUD de Produtos e Categorias).
-Contrato (CDC), npm run contract-test, Executa apenas os testes de Contrato (Mock Server).
-
 /test/atividade - test
 ├── /api - Copia            # Testes Funcionais (API Real)
 │   ├── category.test.js    # Testes CRUD: Adicionar, Editar e Deletar Categoria
@@ -42,8 +37,3 @@ Contrato (CDC), npm run contract-test, Executa apenas os testes de Contrato (Moc
 └── /contract - Copia       # Testes de Contrato (Mock Server)
     ├── addCategory.test.js # Contrato para Adicionar Categoria (Requisito CDC)
     └── addProduct.test.js  # Contrato para Adicionar Produto (Requisito CDC)
-
-Serviço, Métodos Testados (API Real), Teste de Contrato (CDC), Requisito Atendido
-Produtos, "addProduct, editProduct, deleteProduct (CRUD Completo)", ✅ addProduct,CDC para ao menos 1 método.
-Categorias, "addCategory, editCategory, deleteCategory (CRUD Completo)", ✅ addCategory,CDC para ao menos 1 método.
-
