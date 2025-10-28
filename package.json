@@ -15,10 +15,21 @@
   "license": "ISC",
   "devDependencies": {
     "mocha": "^10.3.0",
-    "pactum": "^3.6.0"
+    "pactum": "^3.8.0"
   },
   "dependencies": {
     "pactum-flow-plugin": "^0.1.4",
     "pactum-matchers": "^1.1.6"
-  }
+  },
+  "directories": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EBAC-QE/pactum-contract.git"
+  },
+  "bugs": {
+    "url": "https://github.com/EBAC-QE/pactum-contract/issues"
+  },
+  "homepage": "https://github.com/EBAC-QE/pactum-contract#readme"
 }
