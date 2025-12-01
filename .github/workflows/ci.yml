@@ -1,13 +1,12 @@
-name: CI e Publicação de Resultados
+name: CI e Publicação de Resultados com Docker
 
 on:
   push:
-    # Ajuste os branches conforme necessário para o seu novo repositório Pactum
     branches: [ "main", "exercicios/modulo-4" ] 
   workflow_dispatch:
 
 jobs:
-  test_and_publish: 
+  test_and_publish:
     runs-on: ubuntu-latest
     
     permissions:
@@ -19,6 +18,11 @@ jobs:
     - name: ⬇️ Checkout do Código
       uses: actions/checkout@v4
 
+    # 1. ETAPA CRÍTICA: LIGAR O DOCKER COM SERVICOS DE TESTE
+    # Esta etapa irá iniciar o ServeRest (3000) e qualquer outro serviço (8180)
+    - name: 🚀 Subir Serviços com Docker Compose
+      run: docker-compose up -d
+
     - name: ⚙️ Configurar Node.js
       uses: actions/setup-node@v4
       with:
@@ -27,19 +31,22 @@ jobs:
     - name: 📦 Instalar Dependências
       run: npm install
 
-    # 🎯 PARTE CRÍTICA CORRIGIDA: Usa o script do Pactum/Mocha
-    - name: 🧪 Rodar Testes (Serverest + Pactum) 
-      # CORREÇÃO AQUI: Chama o script 'test:ci' (que é o nome correto para o Pactum/Mocha)
-      run: npm run test:ci 
-      # Não precisa de continue-on-error, pois o job deve falhar se os testes falharem
+    # 2. ETAPA CRÍTICA: AGUARDAR O SERVIDOR FICAR PRONTO E RODAR OS TESTES
+    # Usamos o 'wait-for-it' para garantir que a porta 3000 esteja respondendo
+    - name: 🧪 Aguardar Servidor e Rodar Testes Pactum/Mocha
+      # Instalamos o 'wait-for-it' que pode ser usado para esperar a porta 3000
+      run: |
+        # Espera o ServeRest subir (50 segundos de timeout)
+        npm install -g wait-for-it
+        wait-for-it localhost:3000 --timeout=50
+        
+        # O Docker está rodando, então executamos os testes diretamente
+        npm run test 
 
-    # 4. Publicação do Relatório (Ajustado para relatórios Pactum, se houver)
-    - name: ⬆️ Publicar Relatório de Testes
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        # Depende do seu framework Pactum/Mocha.
-        # Se você não tem um relatório HTML sendo gerado, você pode APAGAR esta etapa 4.
-        # Se você usar o Mochawesome no Pactum, o caminho pode ser diferente (ex: ./reports)
-        publish_dir: ./reports # Exemplo de diretório de relatório para Mocha/Pactum
-        publish_branch: gh-pages
+    # 3. ETAPA CRÍTICA: PARAR E LIMPAR O DOCKER
+    - name: 🧹 Parar Serviços Docker
+      if: always() # Garante que rode mesmo que os testes falhem
+      run: docker-compose down
+
+    # Se você não tiver publicação de relatório, remova o restante do Job.
+    # ...

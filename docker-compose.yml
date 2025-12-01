@@ -1,10 +1,21 @@
 version: "3.9"
 services:
+  # 1. SERVIDOR PRINCIPAL DA API (ServeRest - Porta 3000)
+  serverest:
+    image: serverest/serverest
+    ports:
+      - "3000:3000"
+
+  # 2. SERVIDOR DE FLOWS DO PACTUM (O que você encontrou)
   flows:
     image: "pactumjs/flows:latest"
     ports:
       - "8080:8080"
     environment:
       - "DB_HOST=mongo"
+    depends_on:
+      - mongo # Garante que o DB suba antes do flows
+
+  # 3. BANCO DE DADOS (Mongo)
   mongo:
     image: "mongo:4.2.12"
