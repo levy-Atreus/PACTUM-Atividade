@@ -2,18 +2,16 @@ name: CI e Publicação de Resultados
 
 on:
   push:
-    # Ajustei para os branches que você tem no seu repositório. 
-    # Mantenha 'ci' apenas se for o branch principal de trabalho.
-    branches: [ "main", "exercicios/modulo-4" ]
+    # Ajuste os branches conforme necessário para o seu novo repositório Pactum
+    branches: [ "main", "exercicios/modulo-4" ] 
   workflow_dispatch:
 
 jobs:
-  test_and_publish: # Nome do job alterado para maior clareza
+  test_and_publish: 
     runs-on: ubuntu-latest
     
-    # Permissões necessárias para que o deploy no Pages funcione corretamente
     permissions:
-      contents: write # Necessário para o peaceiris/actions-gh-pages
+      contents: write 
       pages: write
       id-token: write
 
@@ -22,28 +20,26 @@ jobs:
       uses: actions/checkout@v4
 
     - name: ⚙️ Configurar Node.js
-      uses: actions/setup-node@v4 # Atualizei para a versão mais recente
+      uses: actions/setup-node@v4
       with:
         node-version: '20' 
         
     - name: 📦 Instalar Dependências
-      # Instala todos os pacotes (incluindo start-server-and-test e serverest)
       run: npm install
 
-    # 🎯 PARTE CRÍTICA: RODA O SCRIPT QUE INICIA O SERVIDOR E TESTA
-    # Este é o comando mais robusto para você, pois usa o 'cy:run-ci' que você já definiu.
-    - name: 🧪 Rodar Testes (Serverest + Cypress)
-      run: npm run cy:run-ci
-      # O continue-on-error não é necessário aqui, pois o "cy:run-ci" deve passar para prosseguir.
+    # 🎯 PARTE CRÍTICA CORRIGIDA: Usa o script do Pactum/Mocha
+    - name: 🧪 Rodar Testes (Serverest + Pactum) 
+      # CORREÇÃO AQUI: Chama o script 'test:ci' (que é o nome correto para o Pactum/Mocha)
+      run: npm run test:ci 
+      # Não precisa de continue-on-error, pois o job deve falhar se os testes falharem
 
-    # 4. Publicação do Relatório (Usando peaceiris/actions-gh-pages)
-    - name: ⬆️ Publicar Relatório de Testes (Mochawesome)
+    # 4. Publicação do Relatório (Ajustado para relatórios Pactum, se houver)
+    - name: ⬆️ Publicar Relatório de Testes
       uses: peaceiris/actions-gh-pages@v3
       with:
-        # Token de segurança para permissão de escrita no GH Pages
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        # Diretório onde o relatório foi gerado.
-        # Ajuste este caminho se o seu relatório final estiver em outro lugar!
-        publish_dir: ./mochawesome-report
-        # O branch de deploy padrão que a Action irá criar/atualizar
+        # Depende do seu framework Pactum/Mocha.
+        # Se você não tem um relatório HTML sendo gerado, você pode APAGAR esta etapa 4.
+        # Se você usar o Mochawesome no Pactum, o caminho pode ser diferente (ex: ./reports)
+        publish_dir: ./reports # Exemplo de diretório de relatório para Mocha/Pactum
         publish_branch: gh-pages
