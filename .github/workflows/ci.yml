@@ -1,19 +1,19 @@
-name: CI e Publicação de Resultados de Teste
+name: CI e Publicação de Resultados
 
 on:
   push:
-    branches: [ "main", "master" ]
-  pull_request:
-    branches: [ "main", "master" ]
+    # Ajustei para os branches que você tem no seu repositório. 
+    # Mantenha 'ci' apenas se for o branch principal de trabalho.
+    branches: [ "main", "exercicios/modulo-4" ]
   workflow_dispatch:
 
 jobs:
-  test_and_publish:
+  test_and_publish: # Nome do job alterado para maior clareza
     runs-on: ubuntu-latest
     
-    # Define as permissões necessárias para o deploy no Pages
+    # Permissões necessárias para que o deploy no Pages funcione corretamente
     permissions:
-      contents: read
+      contents: write # Necessário para o peaceiris/actions-gh-pages
       pages: write
       id-token: write
 
@@ -21,42 +21,29 @@ jobs:
     - name: ⬇️ Checkout do Código
       uses: actions/checkout@v4
 
-    # --- Configuração da Linguagem (ADAPTE AQUI) ---
-    - name: ⚙️ Configurar Node.js (Exemplo)
-      uses: actions/setup-node@v4
+    - name: ⚙️ Configurar Node.js
+      uses: actions/setup-node@v4 # Atualizei para a versão mais recente
       with:
-        node-version: '20' # Mude para a sua versão, se necessário
+        node-version: '20' 
         
     - name: 📦 Instalar Dependências
-      # Mude para o seu comando de instalação (ex: 'pip install -r requirements.txt', 'mvn install')
+      # Instala todos os pacotes (incluindo start-server-and-test e serverest)
       run: npm install
 
-    - name: 🧪 Rodar Testes e Preparar Relatório para Publicação
-      # ⚠️ ADAPTE OS COMANDOS ABAIXO para rodar seus testes e gerar um arquivo HTML ou texto
-      run: |
-        # 1. Executa seus testes. Substitua 'npm test' pelo seu comando de teste.
-        # Exemplo: Se seus testes já geram um arquivo de relatório em 'test-report.html', ignore a linha 2.
-        npm test
-        
-        # 2. Cria a pasta _site (o padrão para artefatos do GitHub Pages)
-        mkdir _site
-        
-        # 3. Cria um arquivo 'index.html' simples com o resultado.
-        #    Se você tiver um relatório de teste mais bonito (HTML), COPIE ele para _site/index.html
-        echo "<h1>✅ Testes Executados com Sucesso!</h1>" > _site/index.html
-        echo "<p>Resultados dos testes em ${{ github.sha }} - $(date)</p>" >> _site/index.html
-        
-        # Exemplo se você tiver um relatório: cp path/to/report.html _site/index.html
+    # 🎯 PARTE CRÍTICA: RODA O SCRIPT QUE INICIA O SERVIDOR E TESTA
+    # Este é o comando mais robusto para você, pois usa o 'cy:run-ci' que você já definiu.
+    - name: 🧪 Rodar Testes (Serverest + Cypress)
+      run: npm run cy:run-ci
+      # O continue-on-error não é necessário aqui, pois o "cy:run-ci" deve passar para prosseguir.
 
-    # --- Publicação no GitHub Pages ---
-    - name: 🔨 Configurar GitHub Pages
-      uses: actions/configure-pages@v4
-
-    - name: ⬆️ Publicar o Artefato (o conteúdo da pasta _site)
-      uses: actions/upload-pages-artifact@v3
+    # 4. Publicação do Relatório (Usando peaceiris/actions-gh-pages)
+    - name: ⬆️ Publicar Relatório de Testes (Mochawesome)
+      uses: peaceiris/actions-gh-pages@v3
       with:
-        path: './_site'
-
-    - name: 🚀 Deploy no GitHub Pages
-      id: deployment
-      uses: actions/deploy-pages@v4
+        # Token de segurança para permissão de escrita no GH Pages
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        # Diretório onde o relatório foi gerado.
+        # Ajuste este caminho se o seu relatório final estiver em outro lugar!
+        publish_dir: ./mochawesome-report
+        # O branch de deploy padrão que a Action irá criar/atualizar
+        publish_branch: gh-pages
