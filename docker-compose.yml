@@ -3,7 +3,7 @@ services:
   # Servidor principal da API (ServeRest)
   serverest:
     # CORREÇÃO AQUI: o nome da imagem é 'serverest'
-    image: serverest 
+    image: serverest/api
     ports:
       - "3000:3000"
 
