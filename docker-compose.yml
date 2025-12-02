@@ -1,12 +1,12 @@
-version: "3.9"
+
 services:
   # Servidor principal da API (ServeRest)
   serverest:
-    image: serverest/serverest
+    # CORREÇÃO AQUI: o nome da imagem é 'serverest'
+    image: serverest 
     ports:
       - "3000:3000"
 
-  # Servidor de Flows do Pactum (O que exige a porta 8080)
   flows:
     image: "pactumjs/flows:latest"
     ports:
@@ -16,6 +16,5 @@ services:
     depends_on:
       - mongo 
 
-  # Banco de Dados
   mongo:
     image: "mongo:4.2.12"
