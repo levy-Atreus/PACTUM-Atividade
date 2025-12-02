@@ -18,10 +18,13 @@ jobs:
     - name: ⬇️ Checkout do Código
       uses: actions/checkout@v4
 
-    # 1. ETAPA CRÍTICA: LIGAR O DOCKER COM SERVICOS DE TESTE
-    # Esta etapa irá iniciar o ServeRest (3000) e qualquer outro serviço (8180)
+    # 1. 🐋 NOVO: INSTALAR O DOCKER COMPOSE V2 (CORREÇÃO DO ERRO)
+    - name: 🐋 Setup Docker Buildx/Compose
+      uses: docker/setup-buildx-action@v3
+      
+    # 2. 🚀 SUBIR SERVIÇOS (USANDO COMANDO SEM HÍFEN)
     - name: 🚀 Subir Serviços com Docker Compose
-      run: docker-compose up -d
+      run: docker compose up -d # <-- Corrigido de docker-compose para docker compose
 
     - name: ⚙️ Configurar Node.js
       uses: actions/setup-node@v4
@@ -31,22 +34,14 @@ jobs:
     - name: 📦 Instalar Dependências
       run: npm install
 
-    # 2. ETAPA CRÍTICA: AGUARDAR O SERVIDOR FICAR PRONTO E RODAR OS TESTES
-    # Usamos o 'wait-for-it' para garantir que a porta 3000 esteja respondendo
+    # 3. 🧪 AGUARDAR E RODAR TESTES
     - name: 🧪 Aguardar Servidor e Rodar Testes Pactum/Mocha
-      # Instalamos o 'wait-for-it' que pode ser usado para esperar a porta 3000
       run: |
-        # Espera o ServeRest subir (50 segundos de timeout)
         npm install -g wait-for-it
         wait-for-it localhost:3000 --timeout=50
-        
-        # O Docker está rodando, então executamos os testes diretamente
         npm run test 
 
-    # 3. ETAPA CRÍTICA: PARAR E LIMPAR O DOCKER
+    # 4. 🧹 LIMPAR SERVIÇOS (USANDO COMANDO SEM HÍFEN)
     - name: 🧹 Parar Serviços Docker
-      if: always() # Garante que rode mesmo que os testes falhem
-      run: docker-compose down
-
-    # Se você não tiver publicação de relatório, remova o restante do Job.
-    # ...
+      if: always() 
+      run: docker compose down # <-- Corrigido de docker-compose para docker compose
