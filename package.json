@@ -4,7 +4,7 @@
   "description": "Testes de Contrato com Pactum",
   "main": "index.js",
   "scripts": {
-    "test": "mocha ./test/setup/auth.setup.js ./test/**/*.test.js", 
+    "test": "mocha ./test/setup/auth.setup.js ./test/atividade/**/*.js", 
     "test:gql": "mocha ./test/graphql/**/*.test.js",
     "test:rest": "mocha ./test/api/**/*.test.js",
     "test:contractProvider": "mocha ./test/contract/loginProvider.test.js",
