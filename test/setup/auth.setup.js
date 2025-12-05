@@ -1,7 +1,9 @@
 // test/setup/auth.setup.js
 
-const { spec, settings } = require('pactum');
-settings.setFlowsServer({ enabled: false });
+const pactum = require('pactum'); // Importe o objeto principal
+const { spec } = pactum;
+
+pactum.settings.setFlowsServer({ enabled: false });
 
 // Definir um usuário único para evitar conflito de e-mail no banco de dados
 const uniqueId = Date.now();
