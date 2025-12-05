@@ -1,6 +1,6 @@
 // test/setup/auth.setup.js
 
-const { s } = require('pactum');
+const { spec } = require('pactum');
 
 // Definir um usuário único para evitar conflito de e-mail no banco de dados
 const uniqueId = Date.now();
@@ -10,7 +10,7 @@ const userPassword = 'senhaSegura123';
 describe('SETUP: Criação e Login de Usuário de Teste', () => {
     // 1. Cadastra o novo usuário (POST /usuarios)
     it('Deve cadastrar um novo usuário para os testes', async () => {
-        await s.post('http://localhost:3000/usuarios')
+        await spec().post('http://localhost:3000/usuarios')
             .withJson({
                 nome: `Teste CI ${uniqueId}`,
                 email: userEmail,
@@ -23,7 +23,7 @@ describe('SETUP: Criação e Login de Usuário de Teste', () => {
 
     // 2. Faz o login e salva o token (POST /login)
     it('Deve logar com o novo usuário e salvar o token', async () => {
-        await s.post('http://localhost:3000/login')
+        await spec().post('http://localhost:3000/login')
             .withJson({
                 email: userEmail,
                 password: userPassword
