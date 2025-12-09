@@ -1,10 +1,11 @@
 // test/setup/auth.setup.js
 
 // 💡 CORREÇÃO 1: Importa 'spec' e 'settings' via desestruturação.
-const { spec, settings } = require('pactum'); 
+//const { spec, settings } = require('pactum'); 
+const { spec } = require('pactum'); 
 
 // 💡 CORREÇÃO 2: Desativa o Flows Server (Solução para o TypeError e ECONNREFUSED).
-settings.setFlowsServer({ enabled: false });
+//settings.setFlowsServer({ enabled: false });
 
 // Definir um usuário único para evitar conflito de e-mail no banco de dados
 const uniqueId = Date.now();

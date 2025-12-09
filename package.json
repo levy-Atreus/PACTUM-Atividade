@@ -3,17 +3,16 @@
   "version": "1.0.0",
   "description": "Testes de Contrato com Pactum",
   "main": "index.js",
-  "scripts": {
-    "test": "mocha ./test/setup/auth.setup.js ./test/atividade/**/*.js", 
-    "test:gql": "mocha ./test/graphql/**/*.test.js",
-    "test:rest": "mocha ./test/api/**/*.test.js",
-    "test:contractProvider": "mocha ./test/contract/loginProvider.test.js",
-    "test:contractConsumer": "mocha ./test/contract/loginConsumer.test.js",
-    
-    "start": "npx serverest", 
-    "test:ci": "start-server-and-test start http://localhost:3000 test" 
-    
-  },
+"scripts": {
+    "test": "mocha --require ./test/mocha.setup.js ./test/setup/auth.setup.js ./test/atividade/**/*.js", 
+    "test:gql": "mocha ./test/graphql/**/*.test.js",
+    "test:rest": "mocha ./test/api/**/*.test.js",
+    "test:contractProvider": "mocha ./test/contract/loginProvider.test.js",
+    "test:contractConsumer": "mocha ./test/contract/loginConsumer.test.js",
+    
+    "start": "npx serverest", 
+    "test:ci": "start-server-and-test start http://localhost:3000 test" 
+},
   "keywords": [],
   "author": "ernestosbarbosa",
   "license": "ISC",
