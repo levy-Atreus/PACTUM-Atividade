@@ -7,32 +7,35 @@ const { like } = require('pactum-matchers');
 // ----------------------------------------------------
 
 function addFlowReporter() {
-    // URL do Pactum Flow Server
     pf.config.url = 'http://localhost:8180';
     pf.config.projectId = 'lojaebac-front';
     pf.config.projectName = 'Loja EBAC Front';
     pf.config.version = '1.0.3';
     pf.config.username = 'scanner';
     pf.config.password = 'scanner';
-    reporter.add(pf.reporter);// Adiciona o reporter ao PactumJS
+    
+    // ✅ COMENTADO para não quebrar o CI (GitHub Actions)
+    // Se você tiver o Pactum Flow Server rodando localmente, pode descomentar.
+    // reporter.add(pf.reporter);
 }
 
 before(async () => {
-    
+    addFlowReporter(); // Chama a configuração, mas o reporter está desligado acima
     await mock.start(4000);
 });
 
 after(async () => {
-    
     await mock.stop();
-    await reporter.end(); 
+    // ✅ Garante que o reporter finalize sem erros
+    if (reporter.reporters.length > 0) {
+        await reporter.end(); 
+    }
 });
 
 // ----------------------------------------------------
 // 2. Definição das Interações (Contratos)
 // ----------------------------------------------------
 
-// Contrato 1: Login Response
 handler.addInteractionHandler('Login Response', () => {
     return {
         provider: 'lojaebac-api',
@@ -59,10 +62,8 @@ handler.addInteractionHandler('Login Response', () => {
     }
 });
 
-// Contrato 2: Add Category Success
 handler.addInteractionHandler('Add Category Success', () => {
     const mockCategoryName = 'Categoria Contrato Mock';
-
     return {
         provider: 'lojaebac-api',
         flow: 'Add Category',
@@ -100,7 +101,7 @@ describe('TESTES DE CONTRATO (CONSUMER)', () => {
     it('FRONT - deve autenticar o usuario corretamente (Login Contract)', async () => {
         await flow("Login")
             .useInteraction('Login Response')
-            .post('http://localhost:4000/public/authUser')
+            .post('http://localhost:4000/public/authUser') // ✅ Bate no MOCK local
             .withJson({
                 "email": "admin@admin.com",
                 "password": "admin123"
@@ -110,20 +111,18 @@ describe('TESTES DE CONTRATO (CONSUMER)', () => {
     });
 
     it('FRONT - deve adicionar uma nova categoria corretamente (Add Category Contract)', async () => {
-
         const fakeToken = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.FAKE.TOKEN";
-        const categoryName = "Nova Categoria Teste"; // Valor enviado pelo Consumidor
+        const categoryName = "Nova Categoria Teste";
 
         await flow("Add Category")
             .useInteraction('Add Category Success')
-            .post('http://localhost:4000/api/addCategory')
+            .post('http://localhost:4000/api/addCategory') // ✅ Bate no MOCK local
             .withHeaders("Authorization", fakeToken)
             .withJson({
                 "name": categoryName
             })
             .expectStatus(200)
             .expectJson('success', true)
-            // Asserção contra o valor MOCKADO no Contrato, não contra o valor enviado
             .expectJson('data.name', 'Categoria Contrato Mock'); 
     });
 });

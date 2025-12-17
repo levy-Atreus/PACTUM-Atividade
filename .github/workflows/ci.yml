@@ -26,6 +26,6 @@ jobs:
     - name: 📦 Instalar Dependências
       run: npm install
 
-    # PARTE CRÍTICA: LIGA O SERVIDOR E RODA OS TESTES MOCHA
-    - name: 🧪 Rodar Testes (Serverest + Pactum)
+    # AJUSTADO: Agora focado em API Externa e Contratos Mockados
+    - name: 🧪 Rodar Testes (API EBAC + Contratos)
       run: npm run test:ci

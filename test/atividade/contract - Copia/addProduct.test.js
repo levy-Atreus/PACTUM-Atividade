@@ -1,36 +1,34 @@
 const { reporter, flow, handler, mock } = require('pactum');
 const pf = require('pactum-flow-plugin'); 
-const { like, eachLike, expression } = require('pactum-matchers'); 
+const { like, eachLike } = require('pactum-matchers'); 
 
 // ----------------------------------------------------
 // 1. Configuração Global (Setup do Mock e do Reporter)
 // ----------------------------------------------------
 
 function addFlowReporter() {
-    // Configuração do Pactum Flow Server
     pf.config.url = 'http://localhost:8180';
     pf.config.projectId = 'lojaebac-front';
     pf.config.projectName = 'Loja EBAC Front';
     pf.config.version = '1.0.3';
     pf.config.username = 'scanner';
     pf.config.password = 'scanner';
-    reporter.add(pf.reporter); 
+    
+    // ✅ COMENTADO: Evita erro de conexão no GitHub Actions (Porta 8180)
+    // reporter.add(pf.reporter); 
 }
 
-// Executado antes de todos os testes
 before(async () => {
-    // 1. Configura e adiciona o reporter do Pactum Flow 
-    // Se o servidor 8180 não estiver online, comente esta linha para evitar falhas de conexão
     addFlowReporter(); 
-
     await mock.start(4000);
 });
 
 after(async () => {
-
     await mock.stop();
-    
-    // await reporter.end(); 
+    // ✅ Finaliza o reporter apenas se ele estiver ativo
+    if (reporter.reporters.length > 0) {
+        await reporter.end(); 
+    }
 });
 
 // ----------------------------------------------------
@@ -66,7 +64,6 @@ handler.addInteractionHandler('Login Response', () => {
 
 // Contrato 2: Add Product Success
 handler.addInteractionHandler('Add Product Success', () => {
-    // Dados Mockados de Resposta
     const mockProductName = 'Produto Contrato Mock';
     const mockProductPrice = 99.99;
     const mockCategoryId = '65f6c825a0b7774e1d1e44f0';
@@ -82,11 +79,9 @@ handler.addInteractionHandler('Add Product Success', () => {
             },
             body: {
                 "name": like('Qualquer Nome String'), 
-                "price": like(75.90),             // Exige tipo Number (Float)
-                "quantity": like(5.00),           // Exige tipo Number (Float)
+                "price": like(75.90),
+                "quantity": like(5.00),
                 "description": like('Qualquer Descrição String'), 
-                
-                //eachLike garante Array de Strings, baseado no seu teste de API
                 "categories": eachLike('ID-CATEGORIA-STRING', { min: 1 }) 
             }
         },
@@ -99,8 +94,8 @@ handler.addInteractionHandler('Add Product Success', () => {
                     "_id": like("65f6c825a0b7774e1d1e44f1"), 
                     "name": mockProductName, 
                     "price": mockProductPrice,
-                    "quantity": like(Number), 
-                    "description": like(String), 
+                    "quantity": like(10), 
+                    "description": like("Descrição"), 
                     "categories": [mockCategoryId], 
                     "__v": like(0)
                 }
@@ -113,7 +108,7 @@ handler.addInteractionHandler('Add Product Success', () => {
 // 3. Casos de Teste (Consumer Tests)
 // ----------------------------------------------------
 
-describe('TESTES DE CONTRATO (CONSUMER)', () => {
+describe('TESTES DE CONTRATO (CONSUMER) - PRODUTOS', () => {
 
     it('FRONT - deve autenticar o usuario corretamente (Login Contract)', async () => {
         await flow("Login")
@@ -127,15 +122,8 @@ describe('TESTES DE CONTRATO (CONSUMER)', () => {
             .expectJson('success', true);
     });
 
-    // TESTE DE CONTRATO: Adição de Produto
     it('FRONT - deve adicionar um novo produto corretamente (Add Product Contract)', async () => {
-
-        // Dados de requisição (Consumidor)
         const fakeToken = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.FAKE.TOKEN";
-        const newProductName = "Produto Front-end Teste"; 
-        const newProductPrice = 150.50;
-        const newProductQuantity = 5.00;
-        const newProductDescription = "Mocked description";
         const categoryId = '65f6c825a0b7774e1d1e44f0';
 
         await flow("Add Product")
@@ -143,15 +131,14 @@ describe('TESTES DE CONTRATO (CONSUMER)', () => {
             .post('http://localhost:4000/api/addProduct') 
             .withHeaders("Authorization", fakeToken) 
             .withJson({
-                "name": newProductName,
-                "price": newProductPrice,
-                "quantity": newProductQuantity, 
-                "description": newProductDescription,
-                "categories": [categoryId] // Array de strings, correspondendo ao eachLike
+                "name": "Produto Front-end Teste",
+                "price": 150.50,
+                "quantity": 5.0, 
+                "description": "Mocked description",
+                "categories": [categoryId]
             })
             .expectStatus(200)
             .expectJson('success', true)
-            // Asserção contra os valores MOCKADOS no Contrato
             .expectJson('data.name', 'Produto Contrato Mock') 
             .expectJson('data.price', 99.99); 
     });

@@ -8,25 +8,23 @@
     "test": "mocha --require ./test/mocha.setup.js ./test/setup/auth.setup.js ./test/atividade/**/*.js",
     "test:gql": "mocha ./test/graphql/**/*.test.js",
     "test:rest": "mocha ./test/api/**/*.test.js",
+    "test:contract": "mocha --require ./test/mocha.setup.js ./test/contract/*.test.js",
     "test:contractProvider": "mocha ./test/contract/loginProvider.test.js",
     "test:contractConsumer": "mocha ./test/contract/loginConsumer.test.js",
     "start": "npx serverest",
-    "test:ci": "start-server-and-test start http://localhost:3000 test"
+    "test:ci": "npm test"
   },
   "keywords": [],
   "author": "ernestosbarbosa",
   "license": "ISC",
   "devDependencies": {
-    "mocha": "^10.3.0",
+    "mocha": "^11.7.5",
     "pactum": "^3.8.0",
-    "start-server-and-test": "^2.0.0"
+    "start-server-and-test": "^2.1.3"
   },
   "dependencies": {
     "pactum-flow-plugin": "^0.1.4",
-    "pactum-matchers": "^1.1.6"
-  },
-  "directories": {
-    "test": "test"
+    "pactum-matchers": "^1.1.7"
   },
   "repository": {
     "type": "git",
