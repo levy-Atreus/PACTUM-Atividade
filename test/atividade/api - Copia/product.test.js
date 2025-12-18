@@ -23,8 +23,15 @@ describe('Testes de API - Loja EBAC (Produtos e Categorias)', () => {
             })
             .expectStatus(200);
         
-        // A API pode retornar o token em 'body.token' ou 'body.data.token'
-        const rawToken = loginRes.body.token || (loginRes.body.data && loginRes.body.data.token);
+        // Captura robusta: tenta em 'token', 'data.token' ou 'accessToken'
+        const rawToken = loginRes.body.token || 
+                         (loginRes.body.data && loginRes.body.data.token) ||
+                         loginRes.body.accessToken;
+
+        if (!rawToken) {
+            throw new Error("Falha Crítica: Token de autenticação não encontrado na resposta da API.");
+        }
+
         token = `Bearer ${rawToken}`;
 
         // 2. SETUP CATEGORIA: Necessária para vincular ao produto
@@ -76,6 +83,8 @@ describe('Testes de API - Loja EBAC (Produtos e Categorias)', () => {
     });
 
     it('API - deve editar o produto corretamente', async () => {
+        if (!productId) throw new Error("ID do Produto não definido para edição.");
+
         const nomeAtualizado = `Editado ${Date.now()}`;
         
         await spec()
@@ -87,6 +96,8 @@ describe('Testes de API - Loja EBAC (Produtos e Categorias)', () => {
     });
 
     it('API - deve deletar o produto corretamente', async () => {
+        if (!productId) throw new Error("ID do Produto não definido para deleção.");
+
         await spec()
             .delete(`/api/deleteProduct/${productId}`) 
             .withHeaders("Authorization", token)

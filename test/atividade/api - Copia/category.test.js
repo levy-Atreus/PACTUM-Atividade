@@ -1,6 +1,6 @@
 const { spec, request } = require('pactum');
 
-// 1. Configuração de URL e Headers Globais para este arquivo
+// 1. Configuração de URL e Headers Globais
 request.setBaseUrl('http://lojaebac.ebaconline.art.br');
 request.setDefaultHeaders({
     'Content-Type': 'application/json',
@@ -13,7 +13,7 @@ let categoryId;
 describe('Testes de API - Categorias EBAC', () => {
 
     beforeEach(async () => {
-        // 1. AUTENTICAÇÃO - Captura o token na raiz
+        // 1. AUTENTICAÇÃO - Captura robusta do token
         const loginRes = await spec()
             .post('/public/authUser')
             .withJson({
@@ -22,8 +22,12 @@ describe('Testes de API - Categorias EBAC', () => {
             })
             .expectStatus(200);
         
-        // Salvando o token com o prefixo Bearer para as próximas chamadas
-        token = `Bearer ${loginRes.body.token || loginRes.body.data.token}`;
+        // Verifica todos os lugares possíveis onde o token pode estar
+        const rawToken = loginRes.body.token || 
+                         (loginRes.body.data && loginRes.body.data.token) || 
+                         loginRes.body.accessToken;
+        
+        token = `Bearer ${rawToken}`;
 
         // 2. CRIAÇÃO DE CATEGORIA (Massa de teste)
         const categoryRes = await spec()
@@ -34,8 +38,8 @@ describe('Testes de API - Categorias EBAC', () => {
             })
             .expectStatus(200);
         
-        // Captura o ID da categoria criada para usar nos testes de PUT e DELETE
-        categoryId = categoryRes.body._id || categoryRes.body.data._id;
+        // Captura o ID garantindo que não venha undefined
+        categoryId = categoryRes.body._id || (categoryRes.body.data && categoryRes.body.data._id);
     });
 
     // TESTE 1: ADIÇÃO
@@ -52,6 +56,9 @@ describe('Testes de API - Categorias EBAC', () => {
 
     // TESTE 2: EDIÇÃO
     it('API - deve editar a categoria corretamente', async () => {
+        // Proteção caso o beforeEach falhe em pegar o ID
+        if (!categoryId) throw new Error("ID da categoria não encontrado no setup.");
+
         const nomeAtualizado = `Editada ${Date.now()}`;
 
         await spec()
@@ -64,6 +71,9 @@ describe('Testes de API - Categorias EBAC', () => {
 
     // TESTE 3: DELEÇÃO
     it('API - deve deletar a categoria corretamente', async () => {
+        // Proteção caso o beforeEach falhe em pegar o ID
+        if (!categoryId) throw new Error("ID da categoria não encontrado no setup.");
+
         await spec()
             .delete(`/api/deleteCategory/${categoryId}`)
             .withHeaders("Authorization", token)
